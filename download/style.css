@@ -1,0 +1,163 @@
+/* ==========================================================================
+   TheoCraft — 下载页专属样式
+   --------------------------------------------------------------------------
+   共享基础（令牌 / 导航 / 按钮 / 步骤 / CTA / 页脚 / 内页页头）在
+   ../assets/css/base.css，这里只写下载页独有的模块：
+     · 下载通道卡片（未开放时置灰禁用）
+     · 软件详细信息
+     · 开发中弹窗
+   ========================================================================== */
+@import url("../assets/css/base.css");
+
+/* --------------------------------------------------------------------------
+   1. 下载通道卡片
+   -------------------------------------------------------------------------- */
+.dl-channels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap);
+}
+.dl-card {
+  display: flex; flex-direction: column;
+  padding: 26px 26px 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-sm);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.dl-card:hover { border-color: var(--line-strong); box-shadow: var(--sh-md); transform: translateY(-3px); }
+
+.dl-card__head { display: flex; align-items: center; gap: 14px; }
+.dl-card__icon {
+  flex: 0 0 auto;
+  display: grid; place-items: center;
+  width: 52px; height: 52px;
+  border-radius: var(--r-md);
+  background: var(--accent-soft-bg);
+  border: 1px solid var(--accent-soft-brd);
+  color: var(--accent-soft-fg);
+}
+.dl-card__name { font-size: 19px; font-weight: 800; letter-spacing: -.01em; }
+.dl-card__sub { margin-top: 2px; font-size: 13px; color: var(--muted); }
+
+.dl-card__meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+.dl-card__desc { margin-top: 14px; font-size: 14px; line-height: 1.75; color: var(--muted); }
+
+.dl-card__foot { margin-top: auto; padding-top: 20px; }
+.dl-card__note {
+  display: flex; align-items: center; gap: 7px;
+  margin-top: 12px;
+  font-size: 12.5px; color: var(--warn);
+}
+html[data-theme="dark"] .dl-card__note { color: #f0a05a; }
+.dl-card__note::before {
+  content: "";
+  width: 7px; height: 7px; border-radius: 50%;
+  background: currentColor; flex: 0 0 auto;
+}
+
+/* --------------------------------------------------------------------------
+   2. 软件详细信息
+   -------------------------------------------------------------------------- */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.info-item {
+  padding: 18px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-sm);
+}
+.info-item__label {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--faint);
+}
+.info-item__value { margin-top: 8px; font-size: 15.5px; font-weight: 650; color: var(--ink); word-break: break-word; }
+
+.feat-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 28px; margin-top: 26px; }
+.feat-list li { position: relative; padding-left: 26px; font-size: 14.5px; line-height: 1.7; color: var(--ink-2); }
+.feat-list li::before {
+  content: "";
+  position: absolute; left: 0; top: .48em;
+  width: 10px; height: 10px;
+  background: linear-gradient(135deg, var(--teal-500) 0 55%, var(--grass-500) 55% 100%);
+  border-radius: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   3. 开发中弹窗
+   -------------------------------------------------------------------------- */
+.modal {
+  position: fixed; inset: 0; z-index: 150;
+  display: grid; place-items: center;
+  padding: 20px;
+}
+.modal[hidden] { display: none; }
+.modal__backdrop {
+  position: absolute; inset: 0;
+  background: rgba(3, 17, 16, .62);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity .26s ease;
+}
+.modal__box {
+  position: relative;
+  width: min(460px, 100%);
+  padding: 30px 30px 26px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: 0 30px 70px rgba(2, 12, 11, .5);
+  transform: translateY(14px) scale(.98);
+  opacity: 0;
+  transition: opacity .28s var(--ease), transform .28s var(--ease);
+}
+.modal.is-open .modal__backdrop { opacity: 1; }
+.modal.is-open .modal__box { opacity: 1; transform: none; }
+
+.modal__eyebrow {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 3px 9px;
+  border: 1px solid var(--accent-soft-brd);
+  border-radius: var(--r-xs);
+  background: var(--accent-soft-bg);
+  color: var(--accent-soft-fg);
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 700; letter-spacing: .14em;
+}
+.modal__title { font-size: 21px; font-weight: 800; }
+.modal__text { margin-top: 12px; font-size: 14.5px; line-height: 1.8; color: var(--muted); }
+.modal__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.modal__close-x {
+  position: absolute; right: 14px; top: 14px;
+  display: grid; place-items: center;
+  width: 32px; height: 32px;
+  border: 0; border-radius: var(--r-sm);
+  background: transparent; color: var(--faint);
+  font-size: 20px; line-height: 1; cursor: pointer;
+  transition: background-color .18s ease, color .18s ease;
+}
+.modal__close-x:hover { background: var(--sunken); color: var(--ink-2); }
+
+/* 弹窗打开时锁住页面滚动 */
+body.is-locked { overflow: hidden; }
+
+/* --------------------------------------------------------------------------
+   4. 响应式
+   -------------------------------------------------------------------------- */
+@media (max-width: 860px) {
+  .info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .dl-channels { grid-template-columns: 1fr; }
+  .info-grid { grid-template-columns: 1fr; }
+  .feat-list { grid-template-columns: 1fr; }
+  .modal__actions .btn { flex: 1 1 auto; }
+}

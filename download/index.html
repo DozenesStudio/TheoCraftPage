@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#04211f">
+  <title>下载 - TheoCraft</title>
+  <meta name="description" content="下载 TheoCraft 转换器（Windows / Android）。把 TheoTown 的城市存档转换成 Minecraft 存档，全程本地转换。">
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      root.classList.add('js');
+      var theme;
+      try {
+        theme = localStorage.getItem('theocraft-theme');
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+      } catch (e) { theme = 'light'; }
+      root.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 3.1 29.2 8.7 18 14.3 6.8 8.7z' fill='%236cbb3c'/%3E%3Cpath d='M6.8 8.7 18 14.3v13.6L6.8 22.3z' fill='%2314a794'/%3E%3Cpath d='M29.2 8.7 18 14.3v13.6l11.2-5.6z' fill='%230b4741'/%3E%3C/svg%3E">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <!-- 导航栏（所有页面一致） -->
+  <header class="nav" id="siteNav">
+    <div class="nav__inner">
+      <a class="logo" href="../index.html" aria-label="TheoCraft 首页">
+        <img class="logo__mark" src="../assets/icon/Sicon.svg" alt="" width="30" height="30">
+        <span class="logo__text">Theo<em>C</em>raft</span>
+      </a>
+
+      <nav class="nav__links" id="navLinks" aria-label="主导航">
+        <a class="nav__link" href="../index.html">首页</a>
+        <a class="nav__link is-active" href="index.html" aria-current="page">下载</a>
+        <a class="nav__link" href="../plugins/index.html">TCP插件适配中心</a>
+        <a class="nav__link" href="../wiki/index.html">Wiki</a>
+        <a class="nav__link" href="../about/index.html">关于</a>
+      </nav>
+
+      <div class="nav__tools">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换到深色模式" title="切换白天 / 黑夜模式">
+          <span class="theme-toggle__icons" aria-hidden="true">
+            <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" width="20" height="20"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="4.1"></circle>
+              <path d="M12 2.6v2.3M12 19.1v2.3M2.6 12h2.3M19.1 12h2.3M5.4 5.4 7 7M17 17l1.6 1.6M18.6 5.4 17 7M7 17l-1.6 1.6">
+              </path>
+            </svg>
+            <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" width="20" height="20"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.5 14.4A8.6 8.6 0 1 1 9.6 3.5a6.7 6.7 0 0 0 10.9 10.9Z"></path>
+            </svg>
+          </span>
+        </button>
+        <button class="hamburger" id="navToggle" type="button" aria-label="打开菜单" aria-expanded="false"
+          aria-controls="navLinks">
+          <span class="hamburger__bar"></span>
+          <span class="hamburger__bar"></span>
+          <span class="hamburger__bar"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- 页头 -->
+    <section class="page-hero">
+      <div class="container">
+        <span class="section__eyebrow page-hero__eyebrow">DOWNLOAD</span>
+        <h1 class="page-hero__title">下载 TheoCraft 转换器</h1>
+        <p class="page-hero__desc">
+          一个桌面端工具：把 TheoTown 的城市存档转换成 Minecraft 存档 / 蓝图，全程本地转换，
+          不上传任何文件，也没有在线转换服务。
+        </p>
+        <div class="page-hero__badges">
+          <span class="badge badge--accent">开发中</span>
+          <span class="badge">Windows / Android</span>
+          <span class="badge">MIT License</span>
+          <span class="badge">版本 v1.0.0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 下载通道 -->
+    <section class="section">
+      <div class="container">
+        <div class="section__head reveal">
+          <span class="section__eyebrow">CHANNELS</span>
+          <h2 class="section__title">选择你的平台</h2>
+          <p class="section__desc">双端内容一致，均包含核心转换引擎与插件中心。下载通道尚未开放，敬请关注开发动态。</p>
+        </div>
+
+        <div class="dl-channels">
+          <!-- Windows 通道 -->
+          <article class="dl-card reveal">
+            <div class="dl-card__head">
+              <span class="dl-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+                  <path d="M3 5.5 10.2 4.5v7H3zM11.4 4.3 21 3v8.4h-9.6zM3 12.6h7.2v7L3 18.6zM11.4 12.6H21V21l-9.6-1.3z"/>
+                </svg>
+              </span>
+              <div>
+                <h3 class="dl-card__name">Windows 桌面端</h3>
+                <p class="dl-card__sub">Windows 10 及更高版本</p>
+              </div>
+            </div>
+            <ul class="dl-card__meta">
+              <li class="meta-chip">.exe 安装包</li>
+              <li class="meta-chip">约 8.4 MB</li>
+              <li class="meta-chip meta-chip--block">JavaFX GUI</li>
+            </ul>
+            <p class="dl-card__desc">完整功能：存档解析、结构映射、世界导出、插件中心，一站式完成城市转换。</p>
+            <div class="dl-card__foot">
+              <a class="btn btn--primary btn--lg btn--block js-dl-btn" href="#" data-dl="windows">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3v12"></path>
+                  <path d="m7 10 5 5 5-5"></path>
+                  <path d="M5 21h14"></path>
+                </svg>
+                下载 Windows 版
+              </a>
+              <p class="dl-card__note js-dl-note">下载通道开发中 · 暂未开放</p>
+            </div>
+          </article>
+
+          <!-- Android 通道 -->
+          <article class="dl-card reveal">
+            <div class="dl-card__head">
+              <span class="dl-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 11a7 7 0 0 1 14 0z"></path>
+                  <path d="M5 11v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path>
+                  <path d="M8 11 6 8M16 11l2-3"></path>
+                  <path d="M9 15h.01M15 15h.01"></path>
+                </svg>
+              </span>
+              <div>
+                <h3 class="dl-card__name">Android 端</h3>
+                <p class="dl-card__sub">Android 8.0 及更高版本（计划）</p>
+              </div>
+            </div>
+            <ul class="dl-card__meta">
+              <li class="meta-chip">.apk 安装包</li>
+              <li class="meta-chip">约 12 MB</li>
+              <li class="meta-chip meta-chip--block">原生 GUI</li>
+            </ul>
+            <p class="dl-card__desc">与桌面端内容一致，方便在移动设备上随时转换、查看你的城市存档。</p>
+            <div class="dl-card__foot">
+              <a class="btn btn--primary btn--lg btn--block js-dl-btn" href="#" data-dl="android">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3v12"></path>
+                  <path d="m7 10 5 5 5-5"></path>
+                  <path d="M5 21h14"></path>
+                </svg>
+                下载 Android 版
+              </a>
+              <p class="dl-card__note js-dl-note">下载通道开发中 · 暂未开放</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 软件详细信息 -->
+    <section class="section section--alt" id="details">
+      <div class="container">
+        <div class="section__head reveal">
+          <span class="section__eyebrow">DETAILS</span>
+          <h2 class="section__title">软件详细信息</h2>
+          <p class="section__desc">以下为当前开发版本的基本信息，正式发布时可能有所调整。</p>
+        </div>
+
+        <div class="info-grid reveal">
+          <div class="info-item">
+            <p class="info-item__label">软件名称</p>
+            <p class="info-item__value">TheoCraft 转换器</p>
+          </div>
+          <div class="info-item">
+            <p class="info-item__label">当前版本</p>
+            <p class="info-item__value">v1.0.0（开发中）</p>
+          </div>
+          <div class="info-item">
+            <p class="info-item__label">支持平台</p>
+            <p class="info-item__value">Windows 10+ / Android 8.0+</p>
+          </div>
+          <div class="info-item">
+            <p class="info-item__label">输入格式</p>
+            <p class="info-item__value">TheoTown .city 存档</p>
+          </div>
+          <div class="info-item">
+            <p class="info-item__label">输出格式</p>
+            <p class="info-item__value">Minecraft 存档 / .schem / .litematic</p>
+          </div>
+          <div class="info-item">
+            <p class="info-item__label">开源许可</p>
+            <p class="info-item__value">MIT License</p>
+          </div>
+        </div>
+
+        <ul class="feat-list reveal">
+          <li>「一格一区块」比例映射，城市尺度完整保留</li>
+          <li>外部映射表 + 结构模板，建筑团队无需编程即可扩内容</li>
+          <li>道路、建筑、植被随地形环境自动适配</li>
+          <li>兼容 WorldEdit / Litematica / MTR 等常用工具</li>
+          <li>全程本地转换，不上传存档、不需要联网</li>
+          <li>双端 GUI，操作简单，拖入存档即可转换</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 使用步骤（与首页一致） -->
+    <section class="section">
+      <div class="container">
+        <div class="section__head reveal">
+          <span class="section__eyebrow">HOW IT WORKS</span>
+          <h2 class="section__title">四步，把你的城市搬进方块世界</h2>
+          <p class="section__desc">整个转换过程都在 TheoCraft 桌面端完成。</p>
+        </div>
+
+        <ol class="steps">
+          <li class="step reveal">
+            <span class="step__num">01</span>
+            <h3 class="step__title">导出 Theotown 的存档</h3>
+            <p class="step__text">在 TheoTown 中打开你的城市，导出 .city 存档文件。</p>
+          </li>
+          <li class="step reveal">
+            <span class="step__num">02</span>
+            <h3 class="step__title">拖进 TheoCraft</h3>
+            <p class="step__text">把存档拖入 TheoCraft，它会自动解析你的城市布局。</p>
+          </li>
+          <li class="step reveal">
+            <span class="step__num">03</span>
+            <h3 class="step__title">导出 Minecraft 存档</h3>
+            <p class="step__text">选择转换模式，一键导出 Minecraft 可用的存档文件。</p>
+          </li>
+          <li class="step reveal">
+            <span class="step__num">04</span>
+            <h3 class="step__title">导入 Minecraft</h3>
+            <p class="step__text">把存档放进 Minecraft 存档目录，进入游戏，你的城市就在眼前。</p>
+          </li>
+        </ol>
+
+        <div class="cta reveal">
+          <div class="cta__text">
+            <span class="section__eyebrow">DESKTOP APP</span>
+            <h3 class="cta__title">下载 TheoCraft 转换器</h3>
+            <p class="cta__desc">计划开发 Android / Windows 双端转换器 GUI，两端内容一致，均包含核心转换引擎功能和插件中心。</p>
+            <p class="cta__label">兼容的插件 / 模组</p>
+            <ul class="chip-list">
+              <li class="chip">WorldEdit</li>
+              <li class="chip">Litematica</li>
+              <li class="chip">MTR</li>
+            </ul>
+          </div>
+          <div class="cta__actions">
+            <a class="btn btn--primary btn--lg btn--block js-dl-btn" href="#" data-dl="any">下载最新版</a>
+            <a class="btn btn--outline btn--block" href="../plugins/index.html">前往插件适配中心</a>
+            <p class="cta__meta">v1.0.0 · 8.4 MB · MIT License</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 开发中弹窗 -->
+  <div class="modal" id="dlModal" role="dialog" aria-modal="true" aria-labelledby="dlModalTitle" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__box">
+      <button class="modal__close-x" type="button" data-close aria-label="关闭">×</button>
+      <span class="modal__eyebrow">DEVELOPING</span>
+      <h2 class="modal__title" id="dlModalTitle">下载通道还在开发中</h2>
+      <p class="modal__text">
+        目前 TheoCraft 转换器仍处于开发阶段，下载通道尚未开放。
+        请关注开发动态，第一时间获取发布通知。
+      </p>
+      <div class="modal__actions">
+        <a class="btn btn--primary" href="https://github.com/dozeneststudio/theocraft" target="_blank"
+          rel="noopener">关注开发动态</a>
+        <button class="btn btn--outline" id="dlModalClose" type="button" data-close>知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页脚（三列） -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__top">
+        <a class="logo logo--footer" href="../index.html" aria-label="TheoCraft 首页">
+          <img class="logo__mark" src="../assets/icon/logo.svg" alt="" width="30" height="30">
+          <span class="logo__text">Theo<em>C</em>raft</span>
+        </a>
+        <p class="footer__tagline">把你的西奥城市，搬进方块世界。</p>
+      </div>
+
+      <div class="footer__cols">
+        <div class="footer__col">
+          <h3 class="footer__col-title">内部导航</h3>
+          <ul class="footer__list">
+            <li><a href="../index.html">首页</a></li>
+            <li><a href="index.html">下载</a></li>
+            <li><a href="../plugins/index.html">TCP插件适配中心</a></li>
+            <li><a href="../wiki/index.html">Wiki</a></li>
+            <li><a href="../about/index.html">关于</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col">
+          <h3 class="footer__col-title">项目外部平台</h3>
+          <ul class="footer__list">
+            <li><a href="https://github.com/dozeneststudio/theocraft" target="_blank" rel="noopener">GitHub</a></li>
+            <!-- 链接待补充 -->
+            <li><a href="#" data-todo title="待补充">Bilibili 动态</a></li>
+            <!-- 链接待补充 -->
+            <li><a href="#" data-todo title="待补充">QQ 群</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col">
+          <h3 class="footer__col-title">外部相关链接</h3>
+          <ul class="footer__list">
+            <!-- 链接待补充 -->
+            <li><a href="#" data-todo title="待补充">Chunkoid 安卓转换器</a></li>
+            <li><a href="https://github.com/HiveGamesOSS/Chunker" target="_blank" rel="noopener">Chunker 转换器</a></li>
+            <!-- 链接待补充 -->
+            <li><a href="#" data-todo title="待补充">TheoTown</a></li>
+            <li><a href="https://www.minecraft.net/" target="_blank" rel="noopener">Minecraft</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p class="footer__copy">© <span id="footerYear">2026</span> TheoCraft</p>
+        <p class="footer__legal">非官方粉丝工具，与 TheoTown 开发者及 Mojang Studios 无关联。</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/base.js" defer></script>
+  <script src="script.js" defer></script>
+</body>
+
+</html>

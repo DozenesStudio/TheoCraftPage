@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#04211f">
+  <title>TheoCraft</title>
+  <meta name="description"
+    content="TheoCraft 是一款桌面端工具：把 TheoTown 的城市存档转换成 Minecraft 存档 / 蓝图，在方块世界里重建你的像素都市。全程本地转换，不上传任何存档，也没有在线转换服务。">
+
+  <!-- 主题判定放在最前面：深色模式用户不会先看到一瞬白屏 -->
+  <script>
+    (function () {
+      var root = document.documentElement;
+      root.classList.add('js');            // 有 JS 才启用滚动入场动画，避免脚本失效时内容不显示
+      var theme;
+      try {
+        theme = localStorage.getItem('theocraft-theme');
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+      } catch (e) {
+        theme = 'light';
+      }
+      root.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  <!-- 内联 SVG 图标，不额外请求文件 -->
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 3.1 29.2 8.7 18 14.3 6.8 8.7z' fill='%236cbb3c'/%3E%3Cpath d='M6.8 8.7 18 14.3v13.6L6.8 22.3z' fill='%2314a794'/%3E%3Cpath d='M29.2 8.7 18 14.3v13.6l11.2-5.6z' fill='%230b4741'/%3E%3C/svg%3E">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <!-- ==========================================================
+       1. 导航栏：覆盖在首屏大图之上，滚动过首屏后变为实底
+          链接居中置顶，左侧 logo 固定；所有页面共用同一套结构
+       ========================================================== -->
+  <header class="nav" id="siteNav">
+    <div class="nav__inner">
+      <!-- LOGO：图片取自 assets/icon/Sicon.svg（单色白，浅色底上由 CSS 反相） -->
+      <a class="logo" href="index.html" aria-label="TheoCraft 首页">
+        <img class="logo__mark" src="assets/icon/Sicon.svg" alt="" width="30" height="30">
+        <span class="logo__text">Theo<em>C</em>raft</span>
+      </a>
+
+      <!-- 导航链接：桌面端绝对居中，窄屏由 JS 收进汉堡菜单 -->
+      <nav class="nav__links" id="navLinks" aria-label="主导航">
+        <a class="nav__link is-active" href="index.html" aria-current="page">首页</a>
+        <a class="nav__link" href="download/index.html">下载</a>
+        <a class="nav__link" href="plugins/index.html">TCP插件适配中心</a>
+        <a class="nav__link" href="wiki/index.html">Wiki</a>
+        <a class="nav__link" href="about/index.html">关于</a>
+      </nav>
+
+      <div class="nav__tools">
+        <!-- 白天 / 黑夜模式切换 -->
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换到深色模式" title="切换白天 / 黑夜模式">
+          <span class="theme-toggle__icons" aria-hidden="true">
+            <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" width="20" height="20"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="4.1"></circle>
+              <path d="M12 2.6v2.3M12 19.1v2.3M2.6 12h2.3M19.1 12h2.3M5.4 5.4 7 7M17 17l1.6 1.6M18.6 5.4 17 7M7 17l-1.6 1.6">
+              </path>
+            </svg>
+            <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" width="20" height="20"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.5 14.4A8.6 8.6 0 1 1 9.6 3.5a6.7 6.7 0 0 0 10.9 10.9Z"></path>
+            </svg>
+          </span>
+        </button>
+
+        <button class="hamburger" id="navToggle" type="button" aria-label="打开菜单" aria-expanded="false"
+          aria-controls="navLinks">
+          <span class="hamburger__bar"></span>
+          <span class="hamburger__bar"></span>
+          <span class="hamburger__bar"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ==========================================================
+         2. Hero 首屏：对比大图铺满整个屏幕
+         ========================================================== -->
+    <section class="hero" id="top">
+
+      <!-- 舞台层：背景图 + 对比图 + 压暗层 + 角标，全部铺满首屏 -->
+      <div class="hero__stage">
+
+        <!-- 全屏背景图：与对比图交替播放（5 秒切换，拖动对比轴时暂停） -->
+        <div class="hero__bg" id="heroBg" aria-hidden="true">
+          <img src="assets/background.webp" alt="" draggable="false">
+        </div>
+
+        <!-- 拖动对比：两张图尺寸完全一致，右侧靠 clip-path 按 --pos 裁剪露出 -->
+        <div class="compare" id="compare" role="slider" tabindex="0"
+          aria-label="TheoTown 原图与 Minecraft 效果对比：左右拖动查看" aria-valuemin="0" aria-valuemax="100"
+          aria-valuenow="50">
+          <img class="compare__layer compare__layer--before" src="assets/before.webp" alt="TheoTown 中的像素城市俯视图"
+            draggable="false" fetchpriority="high">
+          <img class="compare__layer compare__layer--after" src="assets/after.webp" alt="同一座城市转换到 Minecraft 后的方块俯视图"
+            draggable="false" fetchpriority="high">
+
+          <!-- 竖直隔板 + 圆形手柄 + 拖动提示 -->
+          <div class="compare__divider" aria-hidden="true">
+            <span class="compare__handle">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 6 4 12l5 6"></path>
+                <path d="M15 6l5 6-5 6"></path>
+              </svg>
+            </span>
+            <span class="compare__hint">拖动对比</span>
+          </div>
+        </div>
+
+        <!-- 压暗层：保证导航栏与文案在任何截图上都能看清 -->
+        <div class="hero__scrim" aria-hidden="true"></div>
+
+        <span class="tag tag--before">TheoTown</span>
+        <span class="tag tag--after">Minecraft</span>
+      </div>
+
+      <!-- 文案层：鼠标移上来时，整张对比图高斯模糊以突出文字 -->
+      <div class="hero__content">
+        <div class="hero__panel" id="heroPanel">
+          <span class="hero__eyebrow">TheoCraft</span>
+          <h1 class="hero__title">你的城市<span class="hero__comma">·</span>你的世界</h1>
+          <p class="hero__en">YOUR CITY & YOUR WORLD</p>
+          <p class="hero__sub">
+            你曾想象过吗，用 Minecraft 的方式打开你的西奥城市？我们团队的 TheoCraft —— 一个足以颠覆创意的项目，做到了。
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary btn--lg" href="download/index.html">下载 TheoCraft</a>
+            <a class="btn btn--ghost btn--lg" href="#gallery">继续了解</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="pixel-band" aria-hidden="true"></div>
+
+    <!-- ==========================================================
+         3. 转化实例：横向滚动列表（卡片内含前 / 后对比）
+         ========================================================== -->
+    <section class="section" id="gallery">
+      <div class="container">
+        <div class="section__head section__head--row reveal">
+          <div>
+            <span class="section__eyebrow">GALLERY</span>
+            <h2 class="section__title">看看别的市长都搬了什么</h2>
+            <p class="section__desc">每张卡片左边是 TheoTown 存档，右边是生成的MC世界截图，全部由 TheoCraft 生成。</p>
+          </div>
+          <!-- 桌面端左右箭头：不依赖鼠标滚轮横滑 -->
+          <div class="gallery__nav">
+            <button class="arrow" id="galleryPrev" type="button" aria-label="上一个实例">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 5l-7 7 7 7"></path>
+              </svg>
+            </button>
+            <button class="arrow" id="galleryNext" type="button" aria-label="下一个实例">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 卡片由 script.js 里的 CONVERSIONS 数组渲染 -->
+        <div class="gallery__viewport" id="galleryTrack">
+          <div class="gallery__list" id="galleryList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         4. 怎么用：四步流程（下载信息见下载页）
+         ========================================================== -->
+    <section class="section section--alt" id="download">
+      <div class="container">
+        <div class="section__head reveal">
+          <span class="section__eyebrow">HOW IT WORKS</span>
+          <h2 class="section__title">四步，把你的城市搬进方块世界</h2>
+          <p class="section__desc">
+            整个转换过程都在 TheoCraft 桌面端完成。
+          </p>
+        </div>
+
+        <ol class="steps">
+          <li class="step reveal">
+            <span class="step__num">01</span>
+            <h3 class="step__title">导出 Theotown 的存档</h3>
+            <p class="step__text">在 TheoTown 中打开你的城市，导出 .city 存档文件。</p>
+          </li>
+          <li class="step reveal">
+            <span class="step__num">02</span>
+            <h3 class="step__title">拖进 TheoCraft</h3>
+            <p class="step__text">把存档拖入 TheoCraft，它会自动解析你的城市布局。</p>
+          </li>
+          <li class="step reveal">
+            <span class="step__num">03</span>
+            <h3 class="step__title">导出 Minecraft 存档</h3>
+            <p class="step__text">选择转换模式，一键导出 Minecraft 可用的存档文件。</p>
+          </li>
+          <li class="step reveal">
+            <span class="step__num">04</span>
+            <h3 class="step__title">导入 Minecraft</h3>
+            <p class="step__text">把存档放进 Minecraft 存档目录，进入游戏，你的3D城市就在眼前。</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         5. 用户评价：10 秒自动轮播 + 手动刷新
+         ========================================================== -->
+    <section class="section" id="reviews">
+      <div class="container">
+        <div class="section__head reveal">
+          <span class="section__eyebrow">COMMUNITY</span>
+          <h2 class="section__title">用过的人怎么说</h2>
+          <p class="section__desc">摘自各处对 TheoCraft 的评价，总结为【好评如潮】！</p>
+        </div>
+
+        <div class="review">
+          <!-- 外面这层只负责滚动入场：淡入淡出交给里面的 review__card -->
+          <div class="reveal">
+            <!-- aria-live：内容自动变化时对读屏软件友好 -->
+            <article class="review__card" id="reviewCard" aria-live="polite">
+              <div class="review__top">
+                <span class="avatar avatar--lg" id="reviewAvatar">?</span>
+                <div class="review__who">
+                  <p class="review__name" id="reviewName">—</p>
+                  <p class="review__role" id="reviewRole">—</p>
+                </div>
+                <div class="stars" id="reviewStars"></div>
+              </div>
+              <p class="review__text" id="reviewText">—</p>
+              <div class="review__bar"><span id="reviewBar"></span></div>
+            </article>
+          </div>
+
+          <div class="review__controls reveal">
+            <span class="review__timer" id="reviewTimerText">10s 后自动更换</span>
+            <button class="btn btn--outline btn--sm" id="reviewRefreshBtn" type="button">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12a9 9 0 1 1-2.6-6.4"></path>
+                <path d="M21 3v6h-6"></path>
+              </svg>
+              换一条
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================
+       页脚（三列）
+       ========================================================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__top">
+        <a class="logo logo--footer" href="index.html" aria-label="TheoCraft 首页">
+          <img class="logo__mark" src="assets/icon/logo.svg" alt="" width="30" height="30">
+          <span class="logo__text">Theo<em>C</em>raft</span>
+        </a>
+        <p class="footer__tagline">把你的西奥城市，搬进方块世界。</p>
+      </div>
+
+      <div class="footer__cols">
+        <div class="footer__col">
+          <h3 class="footer__col-title">内部导航</h3>
+          <ul class="footer__list">
+            <li><a href="index.html">首页</a></li>
+            <li><a href="download/index.html">下载</a></li>
+            <li><a href="plugins/index.html">TCP插件适配中心</a></li>
+            <li><a href="wiki/index.html">Wiki</a></li>
+            <li><a href="about/index.html">关于</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col">
+          <h3 class="footer__col-title">项目外部平台</h3>
+          <ul class="footer__list">
+            <li><a href="https://github.com/dozeneststudio/theocraft" target="_blank" rel="noopener">GitHub</a></li>
+            <!-- 链接待补充 -->
+            <li><a href="#" data-todo title="待补充">Bilibili 动态</a></li>
+            <!-- 链接待补充 -->
+            <li><a href="#" data-todo title="待补充">QQ 群</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col">
+          <h3 class="footer__col-title">外部相关链接</h3>
+          <ul class="footer__list">
+            <!-- 链接待补充 -->
+            <li><a href="#" data-todo title="待补充">Chunkoid 安卓转换器</a></li>
+            <li><a href="https://github.com/HiveGamesOSS/Chunker" target="_blank" rel="noopener">Chunker 转换器</a></li>
+            <!-- 链接待补充 -->
+            <li><a href="#" data-todo title="待补充">TheoTown</a></li>
+            <li><a href="https://www.minecraft.net/" target="_blank" rel="noopener">Minecraft</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p class="footer__copy">© <span id="footerYear">2026</span> TheoCraft</p>
+        <p class="footer__legal">非官方粉丝工具，与 TheoTown 开发者及 Mojang Studios 无关联。</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/base.js" defer></script>
+  <script src="script.js" defer></script>
+
+<div id="probe-out" style="display:none"></div>
+<script>
+addEventListener('load', function () {
+  setTimeout(function () {
+    var c = document.getElementById('compare');
+    var h = c.querySelector('.compare__handle');
+    var out = [];
+    // 用负 delay 把动画"定格"到指定的时间点，绕过无头虚拟时间冻结
+    function sample(offsetSec) {
+      h.style.animationDelay = (-offsetSec) + 's';
+      h.style.animationPlayState = 'paused';
+      return getComputedStyle(h).transform;
+    }
+    out.push('t0=' + sample(0));
+    out.push('t0.7=' + sample(0.7));
+    out.push('t1.4=' + sample(1.4));
+    out.push('t2.1=' + sample(2.1));
+    h.style.animationDelay = '';
+    h.style.animationPlayState = '';
+    out.push('compareClass=' + c.className);
+    document.getElementById('probe-out').textContent = 'ZZ ' + out.join(' | ');
+  }, 1500);
+});
+</script>
+</body>
+
+</html>

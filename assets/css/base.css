@@ -1,0 +1,757 @@
+/* ==========================================================================
+   TheoCraft — 全站共享基础样式（base.css）
+   --------------------------------------------------------------------------
+   这个文件只放「每个页面都要用」的东西：
+     · 设计令牌（颜色 / 尺寸 / 字体 / 动效曲线）
+     · 基础重置、无障碍工具类
+     · 栅格容器、区块标题、按钮、头像、像素分隔带
+     · 顶部导航栏（含链接居中）与页脚（三列）
+     · 使用步骤、下载 CTA 面板（首页与下载页共用）
+     · 滚动入场动画
+   各页面自己的 style.css 用 @import 引本文件，再写该页专属的样式。
+   主题分两层：品牌色共用，语义色随 data-theme 切换，组件只用语义色。
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. 设计变量
+   -------------------------------------------------------------------------- */
+:root {
+  /* ---- 品牌色 ---- */
+  --teal-950: #04211f;
+  --teal-900: #07302d;
+  --teal-800: #0b4741;
+  --teal-700: #0f6259;
+  --teal-500: #14a794;
+  --teal-400: #2fc0ac;
+  --teal-300: #63d4c2;
+  --teal-200: #9be3d9;
+  --teal-100: #e9f7f4;
+
+  --grass-600: #4c9a2a;
+  --grass-500: #6cbb3c;
+  --grass-400: #8fd45f;
+  --grass-200: #c8e8a8;
+
+  --stone-900: #131a1c;
+  --stone-700: #33403f;
+  --stone-500: #6e7c7b;
+  --stone-400: #98a5a4;
+  --stone-300: #c3cdcc;
+  --stone-200: #dfe6e5;
+  --stone-100: #eff3f2;
+  --stone-050: #f6f9f8;
+
+  --amber: #f0b429;
+  --warn: #b45309;
+
+  /* ---- 尺寸 / 字体 ---- */
+  --r-xs: 3px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --nav-h: 68px;
+  --container: 1180px;
+  --gap: 20px;
+
+  /* 字体全部走系统字体，不请求任何外部资源 */
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", "PingFang SC",
+          "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas,
+               "Liberation Mono", monospace;
+
+  /* ---- 动效曲线 ---- */
+  --ease: cubic-bezier(.22, .61, .36, 1);
+
+  /* ======================================================================
+     语义色：白天（默认值。脚本没跑起来时也能正常显示）
+     ====================================================================== */
+  color-scheme: light;
+
+  --page: #ffffff;                 /* 页面底色 */
+  --surface: #ffffff;              /* 卡片 / 面板底色 */
+  --surface-alt: var(--stone-050); /* 交替区块底色 */
+  --sunken: var(--stone-100);      /* 凹陷区（图片容器、输入框底） */
+
+  --ink: #0d1b1a;                  /* 正文主色 */
+  --ink-2: var(--stone-700);       /* 次级正文 */
+  --muted: #5b6b69;                /* 说明文字 */
+  --faint: var(--stone-400);       /* 最弱的注释文字 */
+
+  --line: #dde5e3;                 /* 分隔线 / 描边 */
+  --line-strong: var(--stone-300);
+  --chip-bg: var(--stone-050);
+  --track: var(--stone-200);       /* 进度条 / 星星底槽 */
+
+  --accent-soft-bg: var(--teal-100);
+  --accent-soft-brd: var(--teal-200);
+  --accent-soft-fg: var(--teal-700);
+  --accent-text: var(--teal-700);
+
+  --grass-soft-bg: #f2fbe8;
+  --grass-soft-brd: var(--grass-200);
+  --grass-soft-fg: var(--grass-600);
+
+  --nav-bg: rgba(255, 255, 255, .82);
+  --nav-brd: rgba(221, 229, 227, .9);
+  --menu-bg: rgba(255, 255, 255, .98);
+
+  --sh-hard: 0 3px 0 rgba(13, 27, 26, .10);
+  --sh-sm: 0 1px 2px rgba(13, 27, 26, .06), 0 3px 10px rgba(13, 27, 26, .05);
+  --sh-md: 0 8px 22px rgba(13, 27, 26, .09), 0 2px 4px rgba(13, 27, 26, .04);
+}
+
+/* ---- 语义色：黑夜 ---- */
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --page: #0a1312;
+  --surface: #101c1b;
+  --surface-alt: #0c1716;
+  --sunken: #16221f;
+
+  --ink: #e9f2f1;
+  --ink-2: #c6d5d3;
+  --muted: #93a8a5;
+  --faint: #6f8482;
+
+  --line: #21302e;
+  --line-strong: #33443f;
+  --chip-bg: #14201e;
+  --track: #223230;
+
+  --accent-soft-bg: #0f2b28;
+  --accent-soft-brd: #1c4a44;
+  --accent-soft-fg: var(--teal-300);
+  --accent-text: var(--teal-300);
+
+  --grass-soft-bg: #17260f;
+  --grass-soft-brd: #2f4d1e;
+  --grass-soft-fg: var(--grass-400);
+
+  --nav-bg: rgba(10, 19, 18, .84);
+  --nav-brd: rgba(33, 48, 46, .9);
+  --menu-bg: rgba(12, 23, 22, .98);
+
+  --sh-hard: 0 3px 0 rgba(0, 0, 0, .5);
+  --sh-sm: 0 1px 2px rgba(0, 0, 0, .4), 0 3px 10px rgba(0, 0, 0, .3);
+  --sh-md: 0 8px 22px rgba(0, 0, 0, .45), 0 2px 4px rgba(0, 0, 0, .3);
+}
+
+/* 切换主题的一瞬间：给所有元素加一层颜色过渡，避免硬切 */
+html.is-theme-switching,
+html.is-theme-switching *,
+html.is-theme-switching *::before,
+html.is-theme-switching *::after {
+  transition: background-color .35s ease, border-color .35s ease,
+              color .35s ease, fill .35s ease !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. 基础重置
+   -------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  /* 锚点跳转时避开固定导航栏 */
+  scroll-padding-top: calc(var(--nav-h) + 20px);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--page);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, p, ul, ol, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; }
+b, strong { font-weight: 700; }
+
+:focus-visible {
+  outline: 3px solid var(--teal-400);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+/* 只给读屏软件看的文字：视觉上不占位 */
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute; left: 12px; top: -60px; z-index: 200;
+  padding: 10px 16px; border-radius: var(--r-sm);
+  background: var(--teal-700); color: #fff; font-size: 14px;
+  transition: top .18s ease;
+}
+.skip-link:focus { top: 12px; }
+
+/* --------------------------------------------------------------------------
+   3. 通用布局与组件
+   -------------------------------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* 首屏是全屏大图，所以下面每一屏都自带上下留白 */
+.section { padding: 92px 0; }
+.section--alt { background: var(--surface-alt); border-block: 1px solid var(--line); }
+
+.section__head { max-width: 720px; margin-bottom: 40px; }
+.section__head--row {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 24px; max-width: none;
+}
+.section__head--row > div { max-width: 640px; }
+
+/* 小标题：等宽 + 大写字距，做出「像素标签」的味道 */
+.section__eyebrow {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 4px 9px;
+  border: 1px solid var(--accent-soft-brd);
+  border-radius: var(--r-xs);
+  background: var(--accent-soft-bg);
+  color: var(--accent-soft-fg);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+}
+
+.section__title {
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1.3;
+  font-weight: 800;
+  letter-spacing: -.015em;
+}
+
+.section__desc { margin-top: 12px; color: var(--muted); font-size: 16px; }
+
+/* --- 按钮 --- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 22px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  font-size: 15px; font-weight: 600; line-height: 1.2;
+  cursor: pointer; white-space: nowrap;
+  transition: transform .12s ease, box-shadow .12s ease,
+              background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+.btn--lg { padding: 15px 28px; font-size: 16px; }
+.btn--sm { padding: 9px 14px; font-size: 14px; }
+.btn--block { display: flex; width: 100%; }
+
+/* 主按钮：实心 + 硬阴影，按下去会「压扁」一格 */
+.btn--primary {
+  background: var(--teal-500); color: #fff;
+  box-shadow: 0 4px 0 var(--teal-700);
+}
+.btn--primary:hover { background: var(--teal-400); }
+.btn--primary:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--teal-700); }
+
+/* 幽灵按钮：跟随所在区域的文字颜色（首屏深色底上用） */
+.btn--ghost {
+  background: transparent;
+  color: var(--btn-ghost-fg, var(--ink));
+  border-color: var(--btn-ghost-bd, var(--line-strong));
+}
+.btn--ghost:hover { background: var(--btn-ghost-bg, rgba(13, 27, 26, .04)); }
+
+/* 描边按钮：浅色底上的次级操作 */
+.btn--outline {
+  background: var(--surface); color: var(--ink-2);
+  border-color: var(--line);
+  box-shadow: var(--sh-hard);
+}
+.btn--outline:hover { border-color: var(--teal-400); color: var(--accent-text); }
+
+/* 禁用态：不可交互、整体置灰（下载通道未开放时用） */
+.btn--disabled,
+.btn:disabled {
+  background: var(--sunken) !important;
+  color: var(--faint) !important;
+  border-color: var(--line) !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  pointer-events: none;
+}
+
+/* --- 头像 --- */
+.avatar {
+  flex: 0 0 auto;
+  display: grid; place-items: center;
+  border-radius: var(--r-sm);
+  background: var(--teal-500); color: #fff;
+  font-weight: 800; letter-spacing: .02em;
+  overflow: hidden;
+}
+.avatar--lg { width: 52px; height: 52px; font-size: 20px; }
+
+/* --- 像素分隔带：一排小方块由蓝绿渐变到草绿 --- */
+.pixel-band {
+  height: 14px;
+  background-image: linear-gradient(90deg, var(--teal-500), var(--grass-500));
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 16px);
+  mask-image: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 16px);
+  opacity: .9;
+}
+
+/* --- 表单输入框（搜索框、投稿表单等复用） --- */
+.field {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--chip-bg);
+  font-family: inherit; font-size: 15px; color: var(--ink);
+  transition: border-color .16s ease, background-color .16s ease;
+}
+.field::placeholder { color: var(--faint); }
+.field:focus {
+  outline: none;
+  border-color: var(--teal-400);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(20, 167, 148, .15);
+}
+.field--area { resize: vertical; min-height: 88px; line-height: 1.7; }
+
+/* --------------------------------------------------------------------------
+   4. 导航栏
+        默认透明地覆盖在首屏大图上（文字白色）；
+        滚过首屏 / 内页无大图时加 .is-solid，换成有底色的毛玻璃。
+        链接居中置顶，左侧 logo 固定在左端。
+   -------------------------------------------------------------------------- */
+.nav {
+  position: fixed; inset: 0 0 auto 0; z-index: 100;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background-color .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+.nav.is-solid {
+  background: var(--nav-bg);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+  border-bottom-color: var(--nav-brd);
+}
+.nav.is-solid.is-scrolled { box-shadow: 0 6px 20px rgba(13, 27, 26, .08); }
+
+.nav__inner {
+  position: relative;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+  height: var(--nav-h);
+  width: 100%; max-width: var(--container);
+  margin: 0 auto; padding: 0 24px;
+}
+
+/* --- LOGO --- */
+.logo { display: inline-flex; align-items: center; gap: 10px; }
+.logo__mark {
+  width: 30px; height: 30px; flex: 0 0 auto;
+  /* 源文件是纯白图形：默认（深色底）保持白色，浅色底上反相成深色 */
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .35));
+  transition: filter .3s ease;
+}
+.logo__text { font-size: 18px; font-weight: 800; letter-spacing: -.01em; }
+.logo__text em { font-style: normal; color: var(--teal-400); }
+
+/* --- 链接：桌面端绝对居中置顶 --- */
+.nav__links {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; align-items: center; gap: 4px;
+  white-space: nowrap;
+}
+.nav__link {
+  padding: 9px 14px;
+  border-radius: var(--r-sm);
+  font-size: 15px; font-weight: 600;
+  transition: background-color .16s ease, color .16s ease;
+}
+/* 当前页高亮 */
+.nav__link.is-active { color: var(--accent-text); }
+
+/* --- 右侧工具区：主题开关 + 汉堡按钮 --- */
+.nav__tools { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; margin-left: auto; }
+
+.theme-toggle {
+  position: relative;
+  display: grid; place-items: center;
+  width: 40px; height: 40px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+.theme-toggle__icons { position: relative; display: block; width: 20px; height: 20px; }
+.theme-toggle__icon {
+  position: absolute; inset: 0;
+  transition: opacity .28s ease, transform .45s var(--ease);
+}
+/* 白天模式显示「月亮」（点它去黑夜），黑夜模式显示「太阳」 */
+.theme-toggle__icon--sun { opacity: 0; transform: rotate(-75deg) scale(.55); }
+.theme-toggle__icon--moon { opacity: 1; transform: none; }
+html[data-theme="dark"] .theme-toggle__icon--sun { opacity: 1; transform: none; }
+html[data-theme="dark"] .theme-toggle__icon--moon { opacity: 0; transform: rotate(75deg) scale(.55); }
+
+/* --- 汉堡按钮（默认隐藏，窄屏出现） --- */
+.hamburger {
+  display: none;
+  flex-direction: column; justify-content: center; gap: 5px;
+  width: 44px; height: 44px; padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease;
+}
+.hamburger__bar {
+  display: block; height: 2px; width: 100%;
+  border-radius: 2px;
+  transition: transform .22s ease, opacity .16s ease, background-color .3s ease;
+}
+/* 展开时：上中下三条变叉 */
+.hamburger.is-open .hamburger__bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.is-open .hamburger__bar:nth-child(2) { opacity: 0; }
+.hamburger.is-open .hamburger__bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* --- 覆盖在首屏大图上时（未变实底）的配色：全部转白 --- */
+.nav:not(.is-solid) .logo__text { color: #fff; }
+.nav:not(.is-solid) .logo__mark { filter: none; }
+.nav:not(.is-solid) .theme-toggle { color: #fff; border-color: rgba(255, 255, 255, .34); background: rgba(255, 255, 255, .10); }
+.nav:not(.is-solid) .theme-toggle:hover { background: rgba(255, 255, 255, .2); }
+.nav:not(.is-solid) .hamburger { border-color: rgba(255, 255, 255, .34); background: rgba(255, 255, 255, .10); }
+.nav:not(.is-solid) .hamburger__bar { background: #fff; }
+
+/* --- 变实底后的配色（跟随主题） --- */
+.nav.is-solid .logo__text { color: var(--ink); }
+.nav.is-solid .logo__text em { color: var(--teal-500); }
+.nav.is-solid .theme-toggle { color: var(--ink-2); border-color: var(--line); background: var(--surface); }
+.nav.is-solid .theme-toggle:hover { border-color: var(--teal-400); color: var(--accent-text); }
+.nav.is-solid .hamburger { border-color: var(--line); background: var(--surface); }
+.nav.is-solid .hamburger__bar { background: var(--ink-2); }
+.nav.is-solid .nav__link { color: var(--ink-2); }
+.nav.is-solid .nav__link:hover { background: var(--accent-soft-bg); color: var(--accent-text); }
+.nav.is-solid .nav__link.is-active { color: var(--accent-text); background: var(--accent-soft-bg); }
+
+/* 白天主题 + 实底导航（白底）时，把白色 logo 反相成深色 */
+html[data-theme="light"] .nav.is-solid .logo__mark { filter: brightness(0) opacity(.88); }
+
+/* 桌面端：是否变实底只看图案颜色需求，链接文字跟随白色 / 主题色 */
+@media (min-width: 861px) {
+  .nav:not(.is-solid) .nav__link { color: rgba(255, 255, 255, .88); }
+  .nav:not(.is-solid) .nav__link:hover { background: rgba(255, 255, 255, .16); color: #fff; }
+  .nav:not(.is-solid) .nav__link.is-active { color: #fff; background: rgba(255, 255, 255, .16); }
+}
+
+/* --------------------------------------------------------------------------
+   5. 使用步骤 + 下载 CTA 面板（首页与下载页共用）
+   -------------------------------------------------------------------------- */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--gap);
+}
+.step {
+  position: relative;
+  padding: 24px 22px 26px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-sm);
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
+}
+.step:hover { transform: translateY(-3px); border-color: var(--line-strong); box-shadow: var(--sh-md); }
+.step__num {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 3px 8px;
+  border-radius: var(--r-xs);
+  background: var(--accent-soft-bg);
+  border: 1px solid var(--accent-soft-brd);
+  color: var(--accent-soft-fg);
+  font-family: var(--font-mono);
+  font-size: 12px; font-weight: 700; letter-spacing: .08em;
+}
+.step__title { font-size: 17px; font-weight: 750; }
+.step__text { margin-top: 8px; font-size: 14px; line-height: 1.75; color: var(--muted); }
+
+/* --- 下载面板（深色块，两个主题下都是深底） --- */
+.cta {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 40px;
+  align-items: center;
+  margin-top: 44px;
+  padding: 38px 40px;
+  border-radius: var(--r-lg);
+  background: var(--teal-900);
+  color: #dfeeeb;
+  /* 角落的方块装饰 */
+  background-image:
+    linear-gradient(135deg, rgba(108, 187, 60, .16) 0 22px, transparent 22px),
+    linear-gradient(315deg, rgba(20, 167, 148, .18) 0 26px, transparent 26px);
+  background-repeat: no-repeat;
+  background-position: left top, right bottom;
+}
+.cta .section__eyebrow {
+  border-color: rgba(155, 227, 217, .3);
+  background: rgba(255, 255, 255, .08);
+  color: var(--teal-200);
+}
+.cta__title { margin-top: 6px; font-size: clamp(21px, 2.3vw, 27px); font-weight: 800; color: #f3fbfa; }
+.cta__desc { margin-top: 10px; font-size: 15px; color: #9dc0bb; }
+
+.cta__label {
+  margin-top: 22px; margin-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: #7fa8a3;
+}
+.chip-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 6px 11px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: var(--r-xs);
+  background: rgba(255, 255, 255, .06);
+  font-family: var(--font-mono);
+  font-size: 12px; color: #cfe6e2;
+  transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
+}
+.chip:hover { background: rgba(255, 255, 255, .13); border-color: rgba(255, 255, 255, .34); transform: translateY(-2px); }
+
+.cta__actions { display: flex; flex-direction: column; gap: 12px; }
+.cta .btn--outline {
+  background: transparent; color: #cfe6e2; border-color: rgba(255, 255, 255, .24);
+  box-shadow: none;
+}
+.cta .btn--outline:hover { border-color: var(--teal-400); color: #fff; }
+/* CTA 深色底上的禁用按钮：保持可读的灰 */
+.cta .btn--disabled,
+.cta .btn:disabled {
+  background: rgba(255, 255, 255, .06) !important;
+  color: #7fa8a3 !important;
+  border-color: rgba(255, 255, 255, .14) !important;
+}
+.cta__meta {
+  margin-top: 4px; text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11.5px; letter-spacing: .04em; color: #7fa8a3;
+}
+
+/* --------------------------------------------------------------------------
+   6. 题注 / 免责声明
+   -------------------------------------------------------------------------- */
+.about__note {
+  max-width: 660px; margin: 46px auto 0;
+  text-align: center;
+  font-size: 12.5px; line-height: 1.8; color: var(--faint);
+}
+.about__note a { color: var(--accent-text); text-decoration: underline; }
+
+/* --------------------------------------------------------------------------
+   6.5 内页页头（下载 / 插件中心 / Wiki / 关于 共用）
+        内页没有全屏大图，页头自带顶部留白避开固定导航。
+   -------------------------------------------------------------------------- */
+.page-hero {
+  position: relative;
+  padding: calc(var(--nav-h) + 60px) 0 52px;
+  background: var(--surface-alt);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+/* 右上角的像素方块装饰 */
+.page-hero::after {
+  content: "";
+  position: absolute; right: -40px; top: -40px;
+  width: 220px; height: 220px;
+  background-image:
+    linear-gradient(135deg, var(--accent-soft-bg) 0 22px, transparent 22px),
+    linear-gradient(315deg, var(--grass-soft-bg) 0 26px, transparent 26px);
+  background-repeat: no-repeat;
+  background-position: right top, right bottom;
+  opacity: .8;
+  pointer-events: none;
+}
+.page-hero__eyebrow { margin-bottom: 14px; }
+.page-hero__title {
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+.page-hero__desc { margin-top: 14px; max-width: 62ch; font-size: 16px; color: var(--muted); }
+.page-hero__badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.badge {
+  padding: 5px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px; letter-spacing: .04em;
+}
+.badge--accent { border-color: var(--accent-soft-brd); background: var(--accent-soft-bg); color: var(--accent-soft-fg); }
+.badge--grass { border-color: var(--grass-soft-brd); background: var(--grass-soft-bg); color: var(--grass-soft-fg); }
+
+/* --------------------------------------------------------------------------
+   7. 页脚（三列）
+   -------------------------------------------------------------------------- */
+.footer {
+  padding: 54px 0 38px;
+  background: var(--teal-950);
+  color: #8fb3ae;
+}
+.footer__top {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 16px 28px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+}
+.logo--footer .logo__text { color: #eaf6f4; }
+.footer__tagline {
+  font-size: 13.5px; color: #7fa8a3;
+}
+.footer__cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 30px 28px;
+  padding: 30px 0 26px;
+}
+.footer__col-title {
+  margin-bottom: 14px;
+  font-family: var(--font-mono);
+  font-size: 11.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--teal-200);
+}
+.footer__list { display: flex; flex-direction: column; gap: 10px; }
+.footer__list a {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 14px; color: #a9c6c2;
+  transition: color .16s ease, transform .16s ease;
+}
+.footer__list a:hover { color: #fff; transform: translateX(2px); }
+/* 待补充的占位链接：稍微弱化，方便后续替换 */
+.footer__list a[data-todo] { color: #6f8f8b; }
+
+.footer__bottom {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 10px 24px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, .1);
+}
+.footer__copy { font-size: 12.5px; color: #5f8580; }
+.footer__legal { font-size: 12.5px; color: #5f8580; }
+
+/* --------------------------------------------------------------------------
+   8. 滚动入场动画
+   -------------------------------------------------------------------------- */
+/* 只在 JS 可用时启用（html.js），脚本失效也不会藏内容 */
+html.js .reveal { opacity: 0; }
+html.js .reveal.is-in {
+  opacity: 1;
+  animation: revealIn .72s var(--ease) backwards;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes revealIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* --------------------------------------------------------------------------
+   9. 响应式（全站共用部分）
+   -------------------------------------------------------------------------- */
+/* 平板：步骤改成两列 */
+@media (max-width: 1024px) {
+  .steps { grid-template-columns: repeat(2, 1fr); }
+  .cta { grid-template-columns: 1fr; gap: 28px; padding: 32px; }
+  .cta__actions { max-width: 340px; }
+}
+
+/* 窄屏：导航收进汉堡菜单 */
+@media (max-width: 860px) {
+  .hamburger { display: flex; }
+
+  /* 折叠面板：绝对定位挂在导航栏下方（覆盖桌面的居中定位） */
+  .nav__links {
+    position: absolute;
+    left: 0; right: 0; top: 100%;
+    transform: none;
+    flex-direction: column; align-items: stretch; gap: 0;
+    padding: 6px 16px 14px;
+    background: var(--menu-bg);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 16px 30px rgba(13, 27, 26, .16);
+    /* 收起状态 */
+    opacity: 0; visibility: hidden; transform: translateY(-10px);
+    transition: opacity .2s ease, transform .2s ease, visibility .2s;
+  }
+  .nav__links.is-open { opacity: 1; visibility: visible; transform: none; }
+
+  .nav__link,
+  .nav.is-solid .nav__link {
+    padding: 15px 6px;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    font-size: 16px;
+    color: var(--ink-2);
+    white-space: normal;
+  }
+  .nav__link:last-child { border-bottom: 0; }
+  .nav__link:hover,
+  .nav.is-solid .nav__link:hover { background: transparent; color: var(--accent-text); }
+
+  .section { padding: 72px 0; }
+  .section__head { margin-bottom: 32px; }
+  .section__head--row { flex-direction: column; align-items: flex-start; gap: 20px; }
+}
+
+/* 手机 */
+@media (max-width: 620px) {
+  :root { --nav-h: 60px; }
+  .container { padding: 0 18px; }
+  .section { padding: 60px 0; }
+  .steps { grid-template-columns: 1fr; }
+  .cta { padding: 26px 22px; }
+  .footer__cols { grid-template-columns: 1fr; gap: 26px; }
+  .footer__top { flex-direction: column; align-items: flex-start; }
+  .footer__bottom { flex-direction: column; align-items: flex-start; }
+}
+
+/* 尊重系统的「减少动态效果」设置 */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  html.js .reveal { opacity: 1; }
+  html.js .reveal.is-in { animation: none; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}

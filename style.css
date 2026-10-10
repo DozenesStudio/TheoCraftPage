@@ -1,0 +1,513 @@
+/* ==========================================================================
+   TheoCraft — 首页专属样式（style.css）
+   --------------------------------------------------------------------------
+   通用部分（设计令牌、导航、按钮、页脚、步骤、CTA、入场动画等）
+   都在 assets/css/base.css 里，这里只写首页独有的模块：
+     · Hero 首屏（全屏背景图 + 拖动对比大图 + 文案框，5 秒交替）
+     · 转化实例横向滚动列表
+     · 用户评价轮播
+   ========================================================================== */
+@import url("assets/css/base.css");
+
+/* --------------------------------------------------------------------------
+   1. Hero 首屏：对比大图铺满整个屏幕
+   -------------------------------------------------------------------------- */
+.hero {
+  position: relative;
+  height: 100vh;
+  height: 100svh;          /* 移动端浏览器地址栏收起时不跳动 */
+  min-height: 520px;
+  overflow: hidden;
+  background: var(--teal-950);
+  /* 首屏永远是深色底：幽灵按钮按深色底配色 */
+  --btn-ghost-fg: #d9ece9;
+  --btn-ghost-bd: rgba(255, 255, 255, .3);
+  --btn-ghost-bg: rgba(255, 255, 255, .1);
+}
+
+/* 舞台层：所有「贴边铺满」的东西都放在这里 */
+.hero__stage {
+  position: absolute; inset: 0; z-index: 1;
+  overflow: hidden;
+  animation: heroFade 1s var(--ease) backwards;
+}
+
+/* --- 全屏背景图：与对比图交替播放 --- */
+.hero__bg {
+  position: absolute; inset: 0; z-index: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 1s var(--ease);
+}
+.hero__bg img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+/* 背景模式：显示背景图，隐藏对比组件和角标 */
+.hero__stage.is-bg .hero__bg { opacity: 1; }
+.hero__stage.is-bg .compare { opacity: 0; pointer-events: none; }
+.hero__stage.is-bg .tag { opacity: 0; }
+
+/* --- 拖动对比组件：没有边框、没有圆角、没有阴影，直接铺满 --- */
+.compare {
+  --pos: 50%;
+  position: absolute; inset: 0; z-index: 1;
+  overflow: hidden;
+  cursor: ew-resize;
+  /* 横向手势交给 JS 处理，纵向仍然可以正常滚动页面（移动端关键） */
+  touch-action: pan-y;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  /* 鼠标悬停在文案框上时，整张对比图糊掉，把注意力让给文字 */
+  /* opacity 用于和背景图交替淡入淡出 */
+  transition: filter .38s var(--ease), transform .5s var(--ease), opacity 1s var(--ease);
+}
+.hero.is-focus .compare { filter: blur(11px) saturate(.92); transform: scale(1.03); }
+
+.compare__layer {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  animation: heroZoom 2s var(--ease) backwards;
+  transition: clip-path .18s ease;
+}
+/* 右侧（Minecraft）图：从左侧按 --pos 裁掉，露出右边的部分 */
+.compare__layer--after { clip-path: inset(0 0 0 var(--pos)); }
+
+/* 拖动过程中关掉过渡，保证跟手 */
+.compare.is-dragging .compare__layer,
+.compare.is-dragging .compare__divider { transition: none; }
+
+.compare__divider {
+  position: absolute; top: 0; bottom: 0; left: var(--pos);
+  width: 2px; margin-left: -1px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 0 0 1px rgba(4, 33, 31, .35), 0 0 26px rgba(0, 0, 0, .5);
+  pointer-events: none;
+  transition: left .18s ease;
+}
+.compare__handle {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid; place-items: center;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--teal-700);
+  box-shadow: 0 6px 18px rgba(4, 33, 31, .5), 0 0 0 6px rgba(255, 255, 255, .24);
+  transition: transform .16s ease;
+}
+.compare:hover .compare__handle,
+.compare.is-dragging .compare__handle { transform: translate(-50%, -50%) scale(1.06); }
+
+/* 首次进入时的「可以拖」暗示：手柄轻轻来回晃 */
+.compare:not(.has-touched):not(:hover) .compare__handle {
+  animation: handleNudge 2.8s ease-in-out 1.4s infinite;
+}
+
+/* 手柄下方的提示药丸 */
+.compare__hint {
+  position: absolute; left: 0; top: calc(50% + 46px);
+  transform: translateX(-50%);
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .94);
+  color: var(--teal-800);
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  white-space: nowrap;
+  box-shadow: 0 8px 22px rgba(2, 12, 11, .38);
+  transition: opacity .3s ease, transform .3s ease;
+}
+.compare.has-touched .compare__hint { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+
+/* --- 压暗层：保证导航栏和文案在任何截图上都看得清 ---
+   默认只上 62% 的浓度，背景大图能透出来；
+   鼠标悬停 / 键盘聚焦到文案框时补满至 100%。 */
+.hero__scrim {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    /* 顶部：给导航栏压出一块足够暗的底，白色文字才稳 */
+    linear-gradient(180deg, rgba(3, 17, 16, .82) 0%, rgba(3, 17, 16, .58) 7%,
+                    rgba(3, 17, 16, .24) 19%, transparent 38%),
+    /* 底部：托住文案框 */
+    linear-gradient(0deg, rgba(3, 17, 16, .86) 0%, rgba(3, 17, 16, .5) 20%, transparent 54%);
+  opacity: .62;
+  transition: opacity .42s var(--ease);
+}
+.hero.is-focus .hero__scrim { opacity: 1; }
+
+/* --- 左上 / 右上标签 --- */
+.tag {
+  position: absolute; top: calc(var(--nav-h) + 18px); z-index: 3;
+  padding: 6px 10px;
+  border-radius: var(--r-xs);
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  transition: opacity .8s var(--ease);
+  animation: heroIn .9s var(--ease) .5s backwards;
+}
+.tag--before {
+  left: max(24px, calc((100% - var(--container)) / 2));
+  background: rgba(4, 33, 31, .68); color: var(--teal-200);
+  border: 1px solid rgba(155, 227, 217, .38);
+}
+.tag--after {
+  right: max(24px, calc((100% - var(--container)) / 2));
+  background: rgba(60, 122, 32, .78); color: #eaf7dc;
+  border: 1px solid rgba(200, 232, 168, .45);
+}
+
+/* 文案层 */
+.hero__content {
+  position: absolute; inset: 0; z-index: 4;
+  display: flex; align-items: flex-end; justify-content: flex-start;
+  /* 下边距加大，把文案框整体往下压；上边距只保留导航栏高度即可 */
+  padding-block: var(--nav-h) clamp(26px, 4vh, 46px);
+  padding-inline: max(24px, calc((100% - var(--container)) / 2));
+  pointer-events: none;    /* 让空白区域仍然可以拖动对比图 */
+}
+
+/* 文案框：默认浅浅一层玻璃，保证文字始终清晰；鼠标移上来时加强并模糊底图 */
+.hero__panel {
+  pointer-events: auto;
+  width: 100%;
+  /* 620px 时卡片右边缘会越过画面中线、盖住中央滑块，收窄到 540px 避开；
+     两侧 padding 也一并从 30/26 收到 26/22，让卡片更紧凑 */
+  max-width: 540px;
+  padding: 22px 26px 20px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 20px;
+  background: rgba(3, 18, 17, .46);
+  -webkit-backdrop-filter: blur(9px) saturate(1.1);
+  backdrop-filter: blur(9px) saturate(1.1);
+  box-shadow: 0 24px 64px rgba(2, 12, 11, .46);
+  transition: background-color .38s var(--ease), border-color .38s var(--ease),
+              transform .38s var(--ease);
+}
+.hero.is-focus .hero__panel {
+  background: rgba(3, 18, 17, .66);
+  border-color: rgba(255, 255, 255, .26);
+  transform: translateY(-3px);
+}
+
+.hero__eyebrow {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 4px 10px;
+  border: 1px solid rgba(155, 227, 217, .34);
+  border-radius: var(--r-xs);
+  background: rgba(255, 255, 255, .08);
+  color: var(--teal-200);
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+}
+
+.hero__title {
+  /* 上限从 58px 降到 50px：文案框收窄到 540px 后，58px 会把标题折成两行
+     （实测 52px 是单行上界，50px 留一点余量） */
+  font-size: clamp(30px, 4.2vw, 50px);
+  line-height: 1.14;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  color: #f4fbfa;
+  text-shadow: 0 2px 20px rgba(2, 12, 11, .4);
+}
+.hero__comma { color: var(--teal-300); margin: 0 .12em; }
+
+.hero__en {
+  margin-top: 10px;
+  color: var(--teal-200);
+  font-family: var(--font-mono);
+  font-size: clamp(11px, 1.05vw, 14px);
+  font-weight: 700;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+}
+
+.hero__sub {
+  margin-top: 18px;
+  max-width: 30em;
+  font-size: clamp(14.5px, 1.2vw, 16.5px);
+  line-height: 1.75;
+  color: #b6d2ce;
+}
+
+.hero__actions {
+  margin-top: 24px;
+  display: flex; flex-wrap: wrap; gap: 12px;
+}
+
+/* 文案逐行入场 */
+.hero__panel > * { animation: heroIn .85s var(--ease) backwards; }
+.hero__panel > *:nth-child(1) { animation-delay: .14s; }
+.hero__panel > *:nth-child(2) { animation-delay: .22s; }
+.hero__panel > *:nth-child(3) { animation-delay: .30s; }
+.hero__panel > *:nth-child(4) { animation-delay: .38s; }
+.hero__panel > *:nth-child(5) { animation-delay: .46s; }
+.hero__panel > *:nth-child(6) { animation-delay: .54s; }
+
+/* --------------------------------------------------------------------------
+   2. 转化实例：横向滚动列表
+   -------------------------------------------------------------------------- */
+.gallery__nav { display: flex; gap: 10px; flex: 0 0 auto; }
+
+.arrow {
+  display: grid; place-items: center;
+  width: 44px; height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface); color: var(--ink-2);
+  box-shadow: var(--sh-hard);
+  cursor: pointer;
+  transition: border-color .16s ease, color .16s ease, transform .1s ease;
+}
+.arrow:hover:not(:disabled) { border-color: var(--teal-400); color: var(--accent-text); }
+.arrow:active:not(:disabled) { transform: translateY(2px); }
+.arrow:disabled { opacity: .35; cursor: default; box-shadow: none; }
+
+.gallery__viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;   /* 用 proximity，避免和按钮平滑滚动打架 */
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  padding: 6px 4px 16px;
+}
+.gallery__viewport::-webkit-scrollbar { height: 6px; }
+.gallery__viewport::-webkit-scrollbar-thumb {
+  background: var(--line-strong); border-radius: 999px;
+}
+.gallery__viewport::-webkit-scrollbar-track { background: transparent; }
+
+/* 卡片数量少时按内容左对齐排列，不会出现被撑开的大片空白 */
+.gallery__list {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: var(--gap);
+  width: max-content;
+  min-width: 100%;
+}
+
+.card-shot {
+  flex: 0 0 clamp(272px, 31vw, 366px);
+  display: flex; flex-direction: column;
+  scroll-snap-align: start;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--sh-sm);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.card-shot:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sh-md);
+  border-color: var(--line-strong);
+}
+
+/* 卡片内的前 / 后对比：左原图，右效果图 */
+.card-shot__media {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 186px;
+  background: var(--sunken);
+}
+.card-shot__half { position: relative; overflow: hidden; }
+.card-shot__half img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .55s var(--ease);
+}
+.card-shot:hover .card-shot__half img { transform: scale(1.06); }
+/* 中间那条分界线 */
+.card-shot__half--after { border-left: 2px solid var(--surface); }
+
+.card-shot__tag {
+  position: absolute; left: 8px; bottom: 8px;
+  padding: 3px 7px;
+  border-radius: var(--r-xs);
+  background: rgba(4, 33, 31, .72);
+  color: var(--teal-200);
+  font-family: var(--font-mono);
+  font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+}
+.card-shot__tag--after { background: rgba(60, 122, 32, .8); color: #eaf7dc; }
+
+.card-shot__body { padding: 15px 17px 18px; }
+
+.card-shot__city { font-size: 17px; font-weight: 750; letter-spacing: -.01em; }
+
+.card-shot__meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.meta-chip {
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  background: var(--chip-bg);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: .03em;
+}
+.meta-chip--mode {
+  border-color: var(--accent-soft-brd); background: var(--accent-soft-bg); color: var(--accent-soft-fg);
+}
+.meta-chip--block {
+  border-color: var(--grass-soft-brd); background: var(--grass-soft-bg); color: var(--grass-soft-fg);
+}
+
+.card-shot__note { margin-top: 12px; font-size: 13.5px; color: var(--muted); }
+
+/* --------------------------------------------------------------------------
+   3. 用户评价（10 秒轮播）
+   -------------------------------------------------------------------------- */
+.review { max-width: 800px; margin: 0 auto; }
+
+.review__card {
+  position: relative;
+  padding: 30px 30px 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-md);
+  /* 轮播时的淡入淡出过渡（和 .reveal 不冲突：入场用的是 animation，不是 transition） */
+  transition: opacity .28s ease, transform .28s ease;
+}
+.review__card.is-fading { opacity: 0; transform: translateY(8px); }
+
+/* 卡片左侧的像素装饰条 */
+.review__card::before {
+  content: "";
+  position: absolute; left: 0; top: 26px;
+  width: 4px; height: 46px;
+  background: linear-gradient(var(--teal-500) 0 50%, var(--grass-500) 50% 100%);
+  border-radius: 0 3px 3px 0;
+}
+
+.review__top { display: flex; align-items: center; gap: 14px; }
+.review__who { flex: 1 1 auto; min-width: 0; }
+.review__name { font-size: 16px; font-weight: 750; }
+.review__role { font-size: 13px; color: var(--muted); }
+
+.stars { display: flex; gap: 3px; font-size: 15px; letter-spacing: 1px; }
+.star { color: var(--track); animation: starPop .4s var(--ease) backwards; }
+.star:nth-child(2) { animation-delay: .05s; }
+.star:nth-child(3) { animation-delay: .1s; }
+.star:nth-child(4) { animation-delay: .15s; }
+.star:nth-child(5) { animation-delay: .2s; }
+.star--on { color: var(--amber); }
+
+.review__text {
+  margin-top: 18px;
+  font-size: 16.5px; line-height: 1.85;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.review__bar {
+  margin-top: 22px;
+  height: 3px; border-radius: 999px;
+  background: var(--track);
+  overflow: hidden;
+}
+.review__bar > span {
+  display: block; height: 100%; width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--teal-500), var(--grass-500));
+  transition: width .25s linear;
+}
+
+.review__controls {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-top: 16px;
+}
+.review__timer {
+  font-family: var(--font-mono);
+  font-size: 12px; letter-spacing: .04em; color: var(--muted);
+}
+
+/* --------------------------------------------------------------------------
+   5. 首页专属动效
+   -------------------------------------------------------------------------- */
+@keyframes heroIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes heroFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes heroZoom {
+  from { transform: scale(1.06); }
+  to   { transform: none; }
+}
+@keyframes handleNudge {
+  0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+  50%      { transform: translate(-50%, -50%) translateX(10px); }
+}
+@keyframes starPop {
+  from { opacity: 0; transform: scale(.5) rotate(-25deg); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* --------------------------------------------------------------------------
+   6. 首页响应式
+   -------------------------------------------------------------------------- */
+@media (max-width: 860px) {
+  .hero__content { padding-inline: 20px; }
+  .hero__panel { max-width: none; }
+  .gallery__nav { align-self: flex-end; }
+}
+
+@media (max-width: 620px) {
+  .hero { min-height: 480px; }
+  .hero__content {
+    padding-inline: 18px;
+    padding-block: calc(var(--nav-h) + 16px) 22px;
+  }
+  .hero__panel { padding: 20px 20px 18px; border-radius: 16px; }
+  .hero__eyebrow { margin-bottom: 10px; font-size: 10px; }
+  .hero__title { font-size: clamp(28px, 9vw, 40px); }
+  .hero__en { letter-spacing: .22em; }
+  .hero__sub { margin-top: 12px; font-size: 14px; }
+  .hero__actions { margin-top: 18px; flex-direction: column; align-items: stretch; }
+  .hero__actions .btn { width: 100%; }
+
+  .tag { top: calc(var(--nav-h) + 12px); left: 18px; }
+  .tag--after { left: auto; right: 18px; }
+  /* 手机上文案框占了下半屏，手柄和提示一起上移，落在露出来的画面上 */
+  .compare__handle { top: 40%; width: 44px; height: 44px; }
+  .compare__handle svg { width: 18px; height: 18px; }
+  .compare__hint { top: calc(40% + 36px); font-size: 10px; padding: 4px 10px; }
+
+  .gallery__viewport { padding: 4px 2px 14px; }
+  /* 用 clamp 钳住上限：百分比基准会跟 .gallery__list 的 max-content 互相牵制，
+     两边都被撑得远超屏幕（窄屏时卡片能涨到几千像素），所以这里给死上限 */
+  .card-shot { flex: 0 0 clamp(260px, 80vw, 340px); }
+  .card-shot__media { height: 158px; }
+
+  .review__card { padding: 24px 20px 20px; }
+  .review__text { font-size: 15.5px; }
+}
+
+/* 矮屏笔记本 / 横屏手机：压缩文案区，保证按钮不被挤出首屏 */
+@media (max-height: 700px) and (min-width: 861px) {
+  .hero__panel { padding: 20px 26px 18px; }
+  .hero__title { font-size: clamp(28px, 3.6vw, 44px); }
+  .hero__sub { margin-top: 12px; font-size: 14.5px; }
+  .hero__actions { margin-top: 18px; }
+}
+
+@media (max-height: 560px) {
+  .hero { min-height: 420px; }
+  .hero__eyebrow { display: none; }
+  .hero__sub { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero.is-focus .compare { transform: none; }
+}

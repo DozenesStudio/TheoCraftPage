@@ -1,0 +1,257 @@
+/* ==========================================================================
+   TheoCraft — TCP 插件适配中心 专属样式
+   --------------------------------------------------------------------------
+   共享基础在 ../assets/css/base.css，这里只写本页独有的模块：
+     · 平台介绍 / 贡献流程
+     · 左侧分类树 + 右侧瀑布流列表
+     · 搜索与分类筛选工具条
+     · 右下角悬浮「投稿」加号
+   ========================================================================== */
+@import url("../assets/css/base.css");
+
+/* --------------------------------------------------------------------------
+   1. 平台介绍 + 贡献流程
+   -------------------------------------------------------------------------- */
+.flow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap);
+  margin-top: 8px;
+}
+.flow__step {
+  position: relative;
+  padding: 24px 22px 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-sm);
+}
+.flow__num {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 3px 8px;
+  border-radius: var(--r-xs);
+  background: var(--accent-soft-bg);
+  border: 1px solid var(--accent-soft-brd);
+  color: var(--accent-soft-fg);
+  font-family: var(--font-mono);
+  font-size: 12px; font-weight: 700; letter-spacing: .08em;
+}
+.flow__title { font-size: 16.5px; font-weight: 750; }
+.flow__text { margin-top: 8px; font-size: 14px; line-height: 1.75; color: var(--muted); }
+
+/* --------------------------------------------------------------------------
+   2. 主体布局：左树 + 右瀑布流
+   -------------------------------------------------------------------------- */
+.plug-layout {
+  display: grid;
+  grid-template-columns: 268px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+/* --- 左侧分类树 --- */
+.plug-side {
+  position: sticky;
+  top: calc(var(--nav-h) + 20px);
+  padding: 20px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-sm);
+  max-height: calc(100vh - var(--nav-h) - 40px);
+  overflow-y: auto;
+}
+.plug-side__title {
+  margin-bottom: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--faint);
+}
+/* 树 */
+.tree__group { margin-bottom: 4px; }
+.tree__toggle {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 9px 8px;
+  border: 0; border-radius: var(--r-sm);
+  background: transparent; cursor: pointer;
+  font-size: 14.5px; font-weight: 700; color: var(--ink);
+  text-align: left;
+  transition: background-color .16s ease, color .16s ease;
+}
+.tree__toggle:hover { background: var(--chip-bg); }
+.tree__caret {
+  flex: 0 0 auto;
+  width: 12px; height: 12px;
+  color: var(--faint);
+  transition: transform .2s ease;
+}
+.tree__group.is-open .tree__caret { transform: rotate(90deg); }
+.tree__count {
+  margin-left: auto;
+  font-family: var(--font-mono); font-size: 11px; color: var(--faint);
+}
+.tree__children { padding-left: 12px; display: none; }
+.tree__group.is-open .tree__children { display: block; }
+.tree__leaf {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 7px 10px;
+  border: 0; border-radius: var(--r-sm);
+  background: transparent; cursor: pointer;
+  font-size: 13.5px; color: var(--ink-2);
+  text-align: left;
+  transition: background-color .16s ease, color .16s ease;
+}
+.tree__leaf:hover { background: var(--chip-bg); color: var(--accent-text); }
+.tree__leaf.is-active { background: var(--accent-soft-bg); color: var(--accent-soft-fg); font-weight: 650; }
+.tree__leaf .tree__count { margin-left: auto; }
+
+/* --- 右侧内容 --- */
+.plug-main { min-width: 0; }
+
+/* 工具条 */
+.plug-tools {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  margin-bottom: 22px;
+}
+.plug-search {
+  position: relative;
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+.plug-search .field { padding-left: 40px; }
+.plug-search__icon {
+  position: absolute; left: 13px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--faint); pointer-events: none;
+}
+.plug-select {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--chip-bg);
+  font-family: inherit; font-size: 14.5px; color: var(--ink);
+  cursor: pointer;
+  transition: border-color .16s ease;
+}
+.plug-select:focus { outline: none; border-color: var(--teal-400); }
+.plug-result {
+  margin-left: auto;
+  font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+  white-space: nowrap;
+}
+
+/* 瀑布流：多栏布局，卡片高度不一 */
+.waterfall {
+  column-count: 3;
+  column-gap: var(--gap);
+}
+.wf-card {
+  break-inside: avoid;
+  margin-bottom: var(--gap);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--sh-sm);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.wf-card:hover { transform: translateY(-4px); box-shadow: var(--sh-md); border-color: var(--line-strong); }
+
+/* 封面：占位色块（不同高度） */
+.wf-card__cover {
+  position: relative;
+  height: var(--h, 150px);
+  background:
+    linear-gradient(135deg, rgba(20, 167, 148, .18), rgba(108, 187, 60, .18)),
+    var(--sunken);
+  display: grid; place-items: center;
+  color: var(--faint);
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em;
+}
+.wf-card__badge {
+  position: absolute; left: 10px; top: 10px;
+  padding: 3px 8px;
+  border-radius: var(--r-xs);
+  background: rgba(4, 33, 31, .74); color: var(--teal-200);
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.wf-card__body { padding: 14px 16px 16px; }
+.wf-card__title { font-size: 15.5px; font-weight: 750; line-height: 1.4; }
+.wf-card__meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.wf-card__foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-top: 12px;
+  font-size: 12.5px; color: var(--muted);
+}
+.wf-card__author { display: inline-flex; align-items: center; gap: 7px; }
+.wf-card__avatar {
+  display: grid; place-items: center;
+  width: 22px; height: 22px;
+  border-radius: var(--r-xs);
+  background: var(--teal-500); color: #fff;
+  font-size: 11px; font-weight: 800;
+}
+/* 空状态 */
+.waterfall__empty {
+  column-span: all;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+
+/* --------------------------------------------------------------------------
+   3. 右下角悬浮「投稿」加号
+   -------------------------------------------------------------------------- */
+.fab {
+  position: fixed; right: 26px; bottom: 26px; z-index: 95;
+  display: inline-flex; align-items: center; gap: 10px;
+  height: 56px; padding: 0 22px 0 18px;
+  border: 0; border-radius: 999px;
+  background: var(--teal-500); color: #fff;
+  font-size: 15px; font-weight: 700;
+  box-shadow: 0 6px 0 var(--teal-700), 0 12px 30px rgba(2, 12, 11, .35);
+  cursor: pointer;
+  transition: background-color .18s ease, transform .12s ease, box-shadow .12s ease;
+}
+.fab:hover { background: var(--teal-400); }
+.fab:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--teal-700); }
+.fab__plus { display: grid; place-items: center; width: 24px; height: 24px; }
+
+/* 轻提示 */
+.toast {
+  position: fixed; left: 50%; bottom: 100px; z-index: 160;
+  transform: translate(-50%, 14px);
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--teal-900); color: #e6f3f1;
+  font-size: 14px;
+  box-shadow: 0 12px 30px rgba(2, 12, 11, .4);
+  opacity: 0; pointer-events: none;
+  transition: opacity .26s ease, transform .26s ease;
+}
+.toast.is-show { opacity: 1; transform: translate(-50%, 0); }
+
+/* --------------------------------------------------------------------------
+   4. 响应式
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .waterfall { column-count: 2; }
+}
+@media (max-width: 860px) {
+  .plug-layout { grid-template-columns: 1fr; }
+  .plug-side {
+    position: static;
+    max-height: none;
+  }
+  .flow { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .waterfall { column-count: 1; }
+  .plug-result { margin-left: 0; }
+  .fab { right: 16px; bottom: 16px; height: 52px; }
+  .fab__label { display: none; }
+  .fab { padding: 0 15px; }
+}
