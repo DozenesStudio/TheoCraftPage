@@ -89,20 +89,28 @@
 }
 .compare__handle {
   position: absolute; top: 50%; left: 50%;
+  /* 居中用 transform（兼容性最好）；晃动和缩放分别用独立的 translate / scale，
+     三个属性互不覆盖，才能做到「一边晃一边放大」 */
   transform: translate(-50%, -50%);
+  translate: 0 0;
+  scale: 1;
   display: grid; place-items: center;
   width: 52px; height: 52px;
   border-radius: 50%;
   background: #fff;
   color: var(--teal-700);
   box-shadow: 0 6px 18px rgba(4, 33, 31, .5), 0 0 0 6px rgba(255, 255, 255, .24);
-  transition: transform .16s ease;
+  transition: scale .16s ease;
 }
 .compare:hover .compare__handle,
-.compare.is-dragging .compare__handle { transform: translate(-50%, -50%) scale(1.06); }
+.compare.is-dragging .compare__handle { scale: 1.06; }
 
-/* 首次进入时的「可以拖」暗示：手柄轻轻来回晃 */
-.compare:not(.has-touched):not(:hover) .compare__handle {
+/* 首次进入时的「可以拖」暗示：手柄轻轻来回晃
+   注意：这里不能写成 :not(:hover)——.compare 是 inset:0 铺满整个首屏的，
+   鼠标一移进画面就命中 hover，动画会被立刻摘掉，等于永远看不到。
+   收尾只交给 .has-touched（用户真正拖过一次 / 用键盘调过就停），
+   拖动中临时停一下，避免和缩放效果打架。 */
+.compare:not(.has-touched):not(.is-dragging) .compare__handle {
   animation: handleNudge 2.8s ease-in-out 1.4s infinite;
 }
 
@@ -446,8 +454,8 @@
   to   { transform: none; }
 }
 @keyframes handleNudge {
-  0%, 100% { transform: translate(-50%, -50%) translateX(0); }
-  50%      { transform: translate(-50%, -50%) translateX(10px); }
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 10px 0; }
 }
 @keyframes starPop {
   from { opacity: 0; transform: scale(.5) rotate(-25deg); }
